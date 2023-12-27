@@ -1,5 +1,7 @@
 """A button mashing game."""
-import pygame
+import contextlib
+with contextlib.redirect_stdout(None):
+    import pygame
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
