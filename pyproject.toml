@@ -9,8 +9,15 @@ packages = [{include = "basic_games"}]
 [tool.poetry.dependencies]
 python = "^3.10"
 pygame = "^2.5.2"
+numpy = "^1.26.2"
 
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.1.9"
+pre-commit = "^3.6.0"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+select = ["E", "F", "I", "PL", "YTT", "RUF"]
