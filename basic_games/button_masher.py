@@ -1,13 +1,16 @@
 """A button mashing game."""
 import contextlib
+
 with contextlib.redirect_stdout(None):
     import pygame
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 
+
 class Counter:
-    """Counter with a draw method"""
+    """Counter with a draw method."""
+
     def __init__(self, position):
         self.counter = 0
         self.pos = position
@@ -19,12 +22,13 @@ class Counter:
     def draw(self, surf):
         display = f"Score: {self.counter}"
         text = self.font.render(display, True, BLACK)
-        rect = text.get_rect(topleft = self.pos)
+        rect = text.get_rect(topleft=self.pos)
         surf.blit(text, rect)
 
 
 class Timer:
-    """Timer for seconds with a draw method"""
+    """Timer for seconds with a draw method."""
+
     def __init__(self, duration, position):
         self.clock = pygame.time.Clock()
         self.event = pygame.USEREVENT
@@ -38,6 +42,7 @@ class Timer:
         self.max_digits = len(str(duration))
 
     def tick(self):
+        """Increment timer and set done if no time left."""
         self.remaining -= 1
         if self.remaining == 0:
             pygame.time.set_timer(self.event, 0)
@@ -49,16 +54,17 @@ class Timer:
         rect = text.get_rect(topleft=self.pos)
         surf.blit(text, rect)
 
+
 class App:
-    """Play button masher"""
+    """Play button masher."""
 
     def __init__(self):
-        """Initialize pygame and the application"""
+        """Initialize pygame and the application."""
         pygame.init()
         pygame.display.set_caption("Mash buttons!")
         self.screen = pygame.display.set_mode((500, 500))
 
-        self.timer = Timer(10, (0,0))
+        self.timer = Timer(10, (0, 0))
         self.counter = Counter((0, 60))
 
         self.running = True
@@ -77,13 +83,13 @@ class App:
             self.draw()
         return self.counter.counter
 
-
     def draw(self):
+        """Draw application."""
         self.screen.fill(WHITE)
         self.timer.draw(self.screen)
         self.counter.draw(self.screen)
         pygame.display.update()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     score = App().run()
