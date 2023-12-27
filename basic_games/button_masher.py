@@ -65,8 +65,6 @@ class App:
 
     def run(self):
         """Run the main event loop."""
-        font = pygame.font.SysFont(None, 100)
-        text = font.render(str(self.timer.remaining), True, (0, 128, 0))
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -77,6 +75,8 @@ class App:
                     if not self.timer.done:
                         self.counter.inc()
             self.draw()
+        return self.counter.counter
+
 
     def draw(self):
         self.screen.fill(WHITE)
@@ -86,4 +86,4 @@ class App:
 
 
 if __name__ == '__main__':
-    App().run()
+    score = App().run()
