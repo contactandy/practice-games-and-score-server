@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>High Scores</title>
+    </head>
+    <style>
+        table, th, td {
+            border:1px solid black;
+            margin:50px;
+        }
+    </style>
+    <body>
+        <table style="width:70%">
+            <caption>Button Masher Hall of Fame</caption>
+            <tr>
+                <th>Username</th>
+                <th>Score</th>
+                <th>Last Played</th>
+            </tr>
+            {%for score in button%}
+                <tr>
+                    <td>{{score[0]}}</td>
+                    <td>{{score[1]}}</td>
+                    <td>{{score[2]}}</td>
+                </tr>
+            {%endfor%}
+        </table>
+        <table style="width:70%">
+            <caption>Good Timing Hall of Fame</caption>
+            <tr>
+                <th>Username</th>
+                <th>Score</th>
+                <th>Last Played</th>
+            </tr>
+            {%for score in timing%}
+                <tr>
+                    <td>{{score[0]}}</td>
+                    <td>{{score[1]}}</td>
+                    <td>{{score[2]}}</td>
+                </tr>
+            {%endfor%}
+        </table>
+    </body>
+</html>
+                
