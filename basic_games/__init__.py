@@ -1,8 +1,6 @@
 import argparse
 
-import button_masher
-import good_timing
-import submission
+from basic_games import button_masher, good_timing, submission
 
 GAME_CATALOGUE = {
     "masher": {"module": button_masher, "server_name": "BUTTON"},

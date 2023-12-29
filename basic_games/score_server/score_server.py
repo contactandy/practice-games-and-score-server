@@ -1,5 +1,10 @@
-# `flask --app score_server.py run`
-from app import app
+"""Entrypoint for running score server"""
+from basic_games.score_server.app import app
+
+
+def main():
+    app.run()
+
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()

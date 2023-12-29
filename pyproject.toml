@@ -6,6 +6,10 @@ authors = ["contactandy <contactandy@duck.com>"]
 readme = "README.md"
 packages = [{include = "basic_games"}]
 
+[tool.poetry.scripts]
+basic-games-client = "basic_games.__init__:main"
+basic-games-server = "basic_games.score_server.score_server:main"
+
 [tool.poetry.dependencies]
 python = "^3.10"
 pygame = "^2.5.2"
@@ -16,6 +20,7 @@ requests = "^2.31.0"
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.1.9"
 pre-commit = "^3.6.0"
+pytest = "^7.4.3"
 
 [build-system]
 requires = ["poetry-core"]

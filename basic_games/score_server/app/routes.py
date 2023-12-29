@@ -8,7 +8,7 @@ import sqlite3
 
 from flask import make_response, redirect, render_template, request, url_for
 
-from app import app
+from basic_games.score_server.app import app
 
 
 @app.route("/")
