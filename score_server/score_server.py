@@ -18,8 +18,10 @@ def index():
     return render_template("index.html")
 
 
-with sqlite3.connect("scores.db") as scores:
-    scores.execute(
+def init_db(conn):
+    """Create tables with the provided database connection."""
+    cursor = conn.cursor()
+    cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS tokens (
             token TEXT UNIQUE,
@@ -27,7 +29,7 @@ with sqlite3.connect("scores.db") as scores:
         );
         """
     )
-    scores.execute(
+    cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS button (
             username TEXT UNIQUE,
@@ -36,7 +38,7 @@ with sqlite3.connect("scores.db") as scores:
         );
         """
     )
-    scores.execute(
+    cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS timing ( 
             username TEXT UNIQUE, 
@@ -45,7 +47,12 @@ with sqlite3.connect("scores.db") as scores:
         );
         """
     )
-    scores.commit()
+    conn.commit()
+
+
+with sqlite3.connect("scores.db") as scores:
+    init_db(scores)
+
 
 SCORE_COMPARISONS_BY_GAME = {
     "BUTTON": {"select": max, "cast": int},
