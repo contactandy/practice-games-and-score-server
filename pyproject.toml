@@ -8,7 +8,7 @@ packages = [{include = "basic_games"}]
 
 [tool.poetry.scripts]
 basic-games-client = "basic_games.__init__:main"
-basic-games-server = "basic_games.score_server.score_server:main"
+basic-games-server = "score_server.score_server:main"
 
 [tool.poetry.dependencies]
 python = "^3.10"
