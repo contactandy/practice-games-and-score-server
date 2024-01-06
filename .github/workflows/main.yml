@@ -8,11 +8,15 @@ jobs:
         shell: bash
     steps:
       - name: Pull Git repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with: 
+          fetch-depth: 0
+      - name: Set repo name env
+        run: echo "REPO_NAME=$(basename -s .git $(git config --local remote.origin.url))" >> $GITHUB_ENV
       - name: Bundle files
-        run: git bundle create $(basename -s .git $(git config --local remote.origin.url)).bundle --all
+        run: git bundle create ${{ env.REPO_NAME }}.bundle --all
       - name: Upload bundle
         uses: actions/upload-artifact@v3
         with:
-          name: bundle
-          path: ./*.bundle
+          name: ${{ env.REPO_NAME }}
+          path: ./${{ env.REPO_NAME }}.bundle
