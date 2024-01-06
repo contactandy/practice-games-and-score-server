@@ -1,0 +1,18 @@
+name: Upload Git Repository
+on: [push]
+jobs:
+  zip-git:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Pull Git repository
+        uses: actions/checkout@v3
+      - name: Bundle files
+        run: git bundle create $(basename -s .git $(git config --local remote.origin.url)).bundle --all
+      - name: Upload bundle
+        uses: actions/upload-artifact@v3
+        with:
+          name: bundle
+          path: ./*.bundle
