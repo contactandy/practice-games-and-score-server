@@ -1,0 +1,29 @@
+name: Upload Git Repository
+on: 
+  push:
+    tags:
+      - "v*"
+jobs:
+  zip-git:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Pull Git repository
+        uses: actions/checkout@v4
+        with: 
+          fetch-depth: 0
+      - name: Set repo name env
+        run: echo "REPO_NAME=$(basename -s .git $(git config --local remote.origin.url))" >> $GITHUB_ENV
+      - name: Bundle files
+        run: git bundle create ${{ env.REPO_NAME }}.bundle --all
+      - name: Upload bundle
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.REPO_NAME }}
+          path: ./${{ env.REPO_NAME }}.bundle
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ env.REPO_NAME}}.bundle
