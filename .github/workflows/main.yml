@@ -1,5 +1,8 @@
 name: Upload Git Repository
-on: [push]
+on: 
+  push:
+    tags:
+      - "v*"
 jobs:
   zip-git:
     runs-on: ubuntu-latest
