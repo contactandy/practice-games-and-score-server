@@ -77,7 +77,7 @@ def show_scores():
 
 HASH_SECRET = hashlib.sha256(b"LEARNING PURPOSES ONLY").digest()
 
-EXPIRE = 10
+EXPIRE = 10  # seconds
 
 
 def insert_token(conn, token):
@@ -122,7 +122,11 @@ def query_token(conn, token):
     cursor = conn.cursor()
     # at query time, remove expired tokens
     cursor.execute(
-        "DELETE FROM tokens WHERE created < CURRENT_TIMESTAMP - ?;", (EXPIRE,)
+        "DELETE FROM tokens "
+        "WHERE "
+        "CAST(strftime('%s', CURRENT_TIMESTAMP) as integer) "
+        "- CAST(strftime('%s', created) as integer) > ?;",
+        (EXPIRE,),
     )
     results = cursor.execute(
         "SELECT * FROM tokens WHERE token = ?;", (token,)
