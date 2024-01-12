@@ -112,7 +112,7 @@ class App:
             self.draw()
             CLOCK.tick(60)
 
-        score = time.time() - start if done else 0
+        score = time.time() - start if done else None
         return score
 
     def draw(self):

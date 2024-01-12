@@ -27,15 +27,16 @@ def main():
     args = PARSER.parse_args()
 
     score = GAME_CATALOGUE[args.game]["module"].App().run()
-    print(f"Congrats, {args.username}, you got a score of {score}!")
+    if score is not None:
+        print(f"Congrats, {args.username}, you got a score of {score}!")
 
-    score_submit = {
-        "game": GAME_CATALOGUE[args.game]["server_name"],
-        "score": score,
-        "username": args.username,
-    }
-    auth_method = GAME_CATALOGUE[args.game]["auth_method"]
-    submission.attempt_posts_with(auth_method, score_submit)
+        score_submit = {
+            "game": GAME_CATALOGUE[args.game]["server_name"],
+            "score": score,
+            "username": args.username,
+        }
+        auth_method = GAME_CATALOGUE[args.game]["auth_method"]
+        submission.attempt_posts_with(auth_method, score_submit)
 
 
 if __name__ == "__main__":
