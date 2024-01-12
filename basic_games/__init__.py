@@ -3,8 +3,16 @@ import argparse
 from basic_games import button_masher, good_timing, submission
 
 GAME_CATALOGUE = {
-    "masher": {"module": button_masher, "server_name": "BUTTON"},
-    "clicker": {"module": good_timing, "server_name": "TIMING"},
+    "masher": {
+        "module": button_masher,
+        "server_name": "BUTTON",
+        "auth_method": "single_use_challenge_response",
+    },
+    "clicker": {
+        "module": good_timing,
+        "server_name": "TIMING",
+        "auth_method": "basic_digest",
+    },
 }
 
 
@@ -26,7 +34,8 @@ def main():
         "score": score,
         "username": args.username,
     }
-    submission.attempt_posts_with("single_use_challenge_response", score_submit)
+    auth_method = GAME_CATALOGUE[args.game]["auth_method"]
+    submission.attempt_posts_with(auth_method, score_submit)
 
 
 if __name__ == "__main__":

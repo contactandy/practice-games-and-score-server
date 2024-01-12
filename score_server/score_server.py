@@ -132,14 +132,39 @@ def query_token(conn, token):
     return results
 
 
+def check_basic_digest(nonce, actual_digest):
+    """
+    Check simplified basic digest authentication: actual_digest should be the
+    sha256 hash of the nonce concatenated with the shared secret.
+    """
+    nonce = secrets.base64.b64decode(nonce)
+    actual_digest = secrets.base64.b64decode(actual_digest)
+    expected_digest = hashlib.sha256(nonce + HASH_SECRET).digest()
+    return expected_digest == actual_digest
+
+
+def check_single_use_challenge_response(sr):
+    """
+    Check if client has previously authenticated with single use challenge
+    response method and obtained a token that is still current.
+    """
+    with sqlite3.connect("scores.db") as scores:
+        authed = query_token(scores, sr)
+    return authed
+
+
 def check_auth(request):
-    """Check that request has a single use token stored in the tokens database"""
-    authed = False
+    """Returns the games for which the request is authorized to submit scores."""
+    authed = []
     sr = request.cookies.get("_SR")
-    app.logger.debug(f"Found sr cookie: {sr}")
+    nonce = request.cookies.get("NONCE")
+    digest = request.cookies.get("DIGEST")
     if sr:
-        with sqlite3.connect("scores.db") as scores:
-            authed = query_token(scores, sr)
+        if check_single_use_challenge_response(sr):
+            authed.append("BUTTON")
+    if nonce and digest:
+        if check_basic_digest(nonce, digest):
+            authed.append("TIMING")
     return authed
 
 
@@ -196,8 +221,12 @@ def submit():
     """
     response = render_template("submit.html")
     # PRG pattern
-    if request.method == "POST" and check_auth(request):
-        app.logger.info("POST is authenticated")
+
+    authed_for = check_auth(request)
+    app.logger.info(f"request is authenticated for {authed_for}")
+
+    sub_for = request.form.get("game") if request.method == "POST" else []
+    if sub_for.upper() in authed_for:
         try:
             with sqlite3.connect("scores.db") as scores:
                 insert_or_update_score(scores, request.form)

@@ -61,6 +61,14 @@ class AuthedSession:
         # TODO ideally create cookie as cookie object
         self.session.cookies.set("_SR", sr.decode())
 
+    def basic_digest(self):
+        """An authentication method for the game server."""
+        nonce = secrets.token_bytes(32)
+        digest = hashlib.sha256(nonce + HASH_SECRET).digest()
+        # TODO ideally create cookie as cookie object
+        self.session.cookies.set("DIGEST", secrets.base64.b64encode(digest).decode())
+        self.session.cookies.set("NONCE", secrets.base64.b64encode(nonce).decode())
+
 
 def attempt_posts_with(auth_method, post_info):
     """
