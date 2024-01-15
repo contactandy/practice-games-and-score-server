@@ -94,10 +94,10 @@ def do_auth():
     Set up a single use challenge response token for a client to use when
     submitting a score.
 
-    When a client visits this endpoint, a paired (sc, sr) value is created
-    such that sr is the hash of sc with a secret key. Because this server is
+    When a client visits this endpoint, a paired (sc, cr) value is created
+    such that cr is the hash of sc with a secret key. Because this server is
     for exercises, the key is hardcoded into the app. The sc value is sent
-    as a cookie in the response to the client. The sr value is stored in the
+    as a cookie in the response to the client. The cr value is stored in the
     tokens database for reference by the submit endpoint.
     """
     response = make_response(redirect(url_for("index")))
@@ -105,11 +105,11 @@ def do_auth():
     if request.method == "GET" and good_ua:
         app.logger.debug("Received request to initiate auth")
         sc = secrets.base64.b64encode(secrets.token_bytes(32))
-        sr = secrets.base64.b64encode(hashlib.sha256(sc + HASH_SECRET).digest())
+        cr = secrets.base64.b64encode(hashlib.sha256(sc + HASH_SECRET).digest())
         with sqlite3.connect("scores.db") as scores:
-            insert_token(scores, sr.decode())
+            insert_token(scores, cr.decode())
         response.set_cookie("_SC", sc.decode())
-        app.logger.debug(f"(sc, sr) = {(sc, sr)}")
+        app.logger.debug(f"(sc, cr) = {(sc, cr)}")
     app.logger.debug(response)
     return response
 
@@ -147,24 +147,24 @@ def check_basic_digest(nonce, actual_digest):
     return expected_digest == actual_digest
 
 
-def check_single_use_challenge_response(sr):
+def check_single_use_challenge_response(cr):
     """
     Check if client has previously authenticated with single use challenge
     response method and obtained a token that is still current.
     """
     with sqlite3.connect("scores.db") as scores:
-        authed = query_token(scores, sr)
+        authed = query_token(scores, cr)
     return authed
 
 
 def check_auth(request):
     """Returns the games for which the request is authorized to submit scores."""
     authed = []
-    sr = request.cookies.get("_SR")
+    cr = request.cookies.get("_CR")
     nonce = request.cookies.get("NONCE")
     digest = request.cookies.get("DIGEST")
-    if sr:
-        if check_single_use_challenge_response(sr):
+    if cr:
+        if check_single_use_challenge_response(cr):
             authed.append("BUTTON")
     if nonce and digest:
         if check_basic_digest(nonce, digest):

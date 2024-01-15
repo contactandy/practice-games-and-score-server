@@ -55,11 +55,11 @@ class AuthedSession:
         AUTH = GAME_SERVER + AUTH_ENDPOINT
         self.session.get(AUTH)
         sc = self.session.cookies["_SC"].encode()
-        sr = secrets.base64.b64encode(hashlib.sha256(sc + HASH_SECRET).digest())
-        logging.debug(f"Auth: (sc, sr) = {(sc, sr)}")
-        # self.session.headers.update({"_SR": secrets.base64.b64encode(sr)})
+        cr = secrets.base64.b64encode(hashlib.sha256(sc + HASH_SECRET).digest())
+        logging.debug(f"Auth: (sc, cr) = {(sc, cr)}")
+        # self.session.headers.update({"_SR": secrets.base64.b64encode(cr)})
         # TODO ideally create cookie as cookie object
-        self.session.cookies.set("_SR", sr.decode())
+        self.session.cookies.set("_CR", cr.decode())
 
     def basic_digest(self):
         """An authentication method for the game server."""
