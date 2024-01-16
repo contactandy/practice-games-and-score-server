@@ -2,6 +2,7 @@
 Score server that includes an authentication process and a score submission
 process.
 """
+import argparse
 import hashlib
 import secrets
 import sqlite3
@@ -246,9 +247,14 @@ def submit():
     return response
 
 
+PARSER = argparse.ArgumentParser(description="Server for logging scores")
+PARSER.add_argument("--port", help="Port to use. Defaults to 5000.")
+
+
 def main():
-    """Main entrypoint for score server"""
-    app.run(debug=True)
+    """Main entrypoint for score server."""
+    args = PARSER.parse_args()
+    app.run(port=args.port, debug=True)
 
 
 if __name__ == "__main__":

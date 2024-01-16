@@ -9,7 +9,6 @@ RETRIES = 5
 
 logging.basicConfig(level=logging.DEBUG)
 
-GAME_SERVER = "http://127.0.0.1:5000"
 AUTH_ENDPOINT = "/auth"
 SCORE_ENDPOINT = "/submit"
 
@@ -28,9 +27,10 @@ class AuthedSession:
     selected method.
     """
 
-    def __init__(self, method):
+    def __init__(self, location, method):
         """Select an authentication method."""
         self.method = getattr(self, method)
+        self.location = location
 
     def do_auth(self, method):
         """Authenticate with the selected method."""
@@ -52,7 +52,7 @@ class AuthedSession:
 
     def single_use_challenge_response(self):
         """An authentication method for the game server."""
-        AUTH = GAME_SERVER + AUTH_ENDPOINT
+        AUTH = self.location + AUTH_ENDPOINT
         self.session.get(AUTH)
         sc = self.session.cookies["_SC"].encode()
         cr = secrets.base64.b64encode(hashlib.sha256(sc + HASH_SECRET).digest())
@@ -70,15 +70,17 @@ class AuthedSession:
         self.session.cookies.set("NONCE", secrets.base64.b64encode(nonce).decode())
 
 
-def attempt_posts_with(auth_method, post_info):
+def attempt_posts_with(dst_socket, auth_method, post_info):
     """
     Send info as data in a post to server after authenticating with the
     given method.
     """
+    dst_addr, dst_port = dst_socket
+    game_server = f"http://{dst_addr}:{dst_port}"
     for attempt in range(RETRIES):
-        with AuthedSession(auth_method) as s:
+        with AuthedSession(game_server, auth_method) as s:
             resp = s.post(
-                GAME_SERVER + SCORE_ENDPOINT, data=post_info, allow_redirects=False
+                game_server + SCORE_ENDPOINT, data=post_info, allow_redirects=False
             )
             logging.debug(
                 f"Submit score attempt {attempt}: response {resp.status_code},"
