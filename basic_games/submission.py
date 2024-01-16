@@ -7,8 +7,6 @@ import requests
 
 RETRIES = 5
 
-logging.basicConfig(level=logging.DEBUG)
-
 AUTH_ENDPOINT = "/auth"
 SCORE_ENDPOINT = "/submit"
 
@@ -40,10 +38,7 @@ class AuthedSession:
         """Method to support context manager."""
         self.session = requests.Session()
         self.session.headers.update({"user-agent": "basic-games"})
-        try:
-            self.do_auth(self.method)
-        except Exception:
-            raise AuthSetupFail("failed to authenticate to server")
+        self.do_auth(self.method)
         return self.session
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -53,8 +48,16 @@ class AuthedSession:
     def single_use_challenge_response(self):
         """An authentication method for the game server."""
         AUTH = self.location + AUTH_ENDPOINT
-        self.session.get(AUTH)
-        sc = self.session.cookies["_SC"].encode()
+        try:
+            self.session.get(AUTH)
+        except requests.exceptions.ConnectionError:
+            raise AuthSetupFail("Unable to connect to /auth endpoint")
+        try:
+            sc = self.session.cookies["_SC"].encode()
+        except KeyError:
+            raise AuthSetupFail(
+                "/auth endpoint did not provide server challenge cookie `_SC`"
+            )
         cr = secrets.base64.b64encode(hashlib.sha256(sc + HASH_SECRET).digest())
         logging.debug(f"Auth: (sc, cr) = {(sc, cr)}")
         # self.session.headers.update({"_SR": secrets.base64.b64encode(cr)})
@@ -77,16 +80,41 @@ def attempt_posts_with(dst_socket, auth_method, post_info):
     """
     dst_addr, dst_port = dst_socket
     game_server = f"http://{dst_addr}:{dst_port}"
+    success = False
     for attempt in range(RETRIES):
-        with AuthedSession(game_server, auth_method) as s:
-            resp = s.post(
-                game_server + SCORE_ENDPOINT, data=post_info, allow_redirects=False
-            )
+        try:
+            with AuthedSession(game_server, auth_method) as s:
+                try:
+                    resp = s.post(
+                        game_server + SCORE_ENDPOINT,
+                        data=post_info,
+                        allow_redirects=False,
+                    )
+                except requests.exceptions.ConnectionError:
+                    logging.debug(
+                        f"Failed attempt {attempt} to connect to score server"
+                    )
+                    continue
+                redirected = resp.status_code == requests.codes.SEE_OTHER
+                location_ok = resp.headers.get("location") == "/submissionOK"
+                if success := redirected and location_ok:
+                    break
+                else:
+                    logging.debug(
+                        f"In attempt {attempt}, submission received response "
+                        f"{resp.status_code}, to location "
+                        f"{resp.headers.get('location')}"
+                    )
+        except AuthSetupFail as auth_fail:
             logging.debug(
-                f"Submit score attempt {attempt}: response {resp.status_code},"
-                f"location {resp.headers.get('location')}"
+                f"Failed attempt {attempt} to authenticate to score server: "
+                f"{auth_fail.args[0]}"
             )
-            redirected = resp.status_code == requests.codes.SEE_OTHER
-            location_ok = resp.headers.get("location") == "/submissionOK"
-            if redirected and location_ok:
-                break
+        except Exception:
+            logging.debug(
+                "Failed score server connection for unknown reason", exc_info=True
+            )
+    if success:
+        logging.info("Submitted score to server")
+    else:
+        logging.info("Failed to submit score to server")

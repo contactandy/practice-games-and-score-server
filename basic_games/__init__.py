@@ -1,4 +1,5 @@
 import argparse
+import logging
 
 from basic_games import button_masher, good_timing, submission
 
@@ -22,6 +23,20 @@ def socket(socket_string):
     return addr, int(port)
 
 
+def getLogLevels():
+    """Return available log level names."""
+    try:
+        level_names = logging.getLevelNamesMapping().keys()
+    except AttributeError:
+        # getLevelNamesMapping only present in >= Python3.11
+        level_names = list(
+            logging.getLevelName(level)
+            for level in range(logging.NOTSET, logging.CRITICAL + 1)
+        )
+        level_names = (level for level in level_names if not level.startswith("Level"))
+    return list(level_names)
+
+
 PARSER = argparse.ArgumentParser(description="Play a game to get a high score!")
 PARSER.add_argument(
     "--game", choices=GAME_CATALOGUE.keys(), required=True, help="select a game"
@@ -34,11 +49,23 @@ PARSER.add_argument(
     help="Location of the score server. Format as `ip/hostname:port`. Defaults"
     " to `localhost:5000`.",
 )
+PARSER.add_argument(
+    "--log-level",
+    choices=getLogLevels(),
+    help="Set log level to one of the named levels. Otherwise doesn't log.",
+)
 
 
 def main():
     """Main routine for basic-games client."""
     args = PARSER.parse_args()
+
+    if args.log_level is None:
+        logging.disable()
+    else:
+        numeric_level = getattr(logging, args.log_level)
+        logging.basicConfig(level=numeric_level)
+        logging.info(f"Log level set to {args.log_level}[{numeric_level}]")
 
     score = GAME_CATALOGUE[args.game]["module"].App().run()
     if score is not None:

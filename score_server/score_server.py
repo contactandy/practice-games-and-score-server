@@ -4,6 +4,7 @@ process.
 """
 import argparse
 import hashlib
+import logging
 import secrets
 import sqlite3
 
@@ -247,14 +248,39 @@ def submit():
     return response
 
 
+def getLogLevels():
+    """Return available log level names."""
+    try:
+        level_names = logging.getLevelNamesMapping().keys()
+    except AttributeError:
+        # getLevelNamesMapping only present in >= Python3.11
+        level_names = list(
+            logging.getLevelName(level)
+            for level in range(logging.NOTSET, logging.CRITICAL + 1)
+        )
+        level_names = (level for level in level_names if not level.startswith("Level"))
+    return list(level_names)
+
+
 PARSER = argparse.ArgumentParser(description="Server for logging scores")
 PARSER.add_argument("--port", help="Port to use. Defaults to 5000.")
+PARSER.add_argument(
+    "--log-level",
+    choices=getLogLevels(),
+    default="INFO",
+    help="Set log level to one of the named levels.",
+)
 
 
 def main():
     """Main entrypoint for score server."""
     args = PARSER.parse_args()
-    app.run(port=args.port, debug=True)
+
+    numeric_level = getattr(logging, args.log_level)
+    logging.basicConfig(level=numeric_level)
+    logging.info(f"Log level set to {args.log_level}[{numeric_level}]")
+
+    app.run(port=args.port)
 
 
 if __name__ == "__main__":
