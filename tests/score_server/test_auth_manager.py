@@ -1,7 +1,8 @@
-"""Test score_server routines."""
+"""Test score_server/auth_manager routines."""
+
 from datetime import datetime, timedelta, timezone
 
-from score_server import score_server
+from score_server import auth_manager
 
 # For checking timestamp creation in database.
 DB_EVENT_MAX_TIME = 3
@@ -28,16 +29,16 @@ def datetime_todbutc(datetime_val):
     return time_string
 
 
-def test_insert_token(score_db):
+def test_insert_token(db):
     """Test insert_token."""
-    cursor = score_db.cursor()
+    cursor = db.cursor()
     no_tokens_present = cursor.execute("SELECT * FROM tokens;").fetchall()
     assert no_tokens_present == []
 
     created = datetime.now(timezone.utc)
     token = "testingtesting123"
-    score_server.insert_token(score_db, token)
-    cursor = score_db.cursor()
+    auth_manager.insert_token(db, token)
+    cursor = db.cursor()
     [token_entry] = cursor.execute("SELECT * FROM tokens;").fetchall()
     token_actual, created_actual = token_entry
     assert token_actual == token
@@ -46,28 +47,28 @@ def test_insert_token(score_db):
     assert time_delta.total_seconds() < DB_EVENT_MAX_TIME
 
 
-def test_query_token(score_db):
+def test_query_token(db):
     """Test query_token."""
-    cursor = score_db.cursor()
+    cursor = db.cursor()
     no_tokens_present = cursor.execute("SELECT * FROM tokens;").fetchall()
     assert no_tokens_present == []
 
     now = datetime.now(timezone.utc)
     created_expected = datetime_todbutc(now)
     created_unexpired = datetime_todbutc(
-        now - timedelta(seconds=score_server.EXPIRE - 1)
+        now - timedelta(seconds=auth_manager.EXPIRE - 1)
     )
-    created_expired = datetime_todbutc(now - timedelta(seconds=score_server.EXPIRE + 1))
+    created_expired = datetime_todbutc(now - timedelta(seconds=auth_manager.EXPIRE + 1))
     tokens = [
         ("querytoken", created_expected),
         ("remainingtoken", created_unexpired),
         ("expiredtoken", created_expired),
     ]
     cursor.executemany("INSERT INTO tokens VALUES (?, ?);", tokens)
-    score_db.commit()
+    db.commit()
 
     token_expected, created_expected = tokens[0]
-    [result] = score_server.query_token(score_db, token_expected)
+    [result] = auth_manager.query_token(db, token_expected)
     token_actual, created_actual = result
     assert token_actual == token_expected
     assert created_actual == created_expected
