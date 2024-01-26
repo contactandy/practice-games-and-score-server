@@ -65,7 +65,7 @@ def do_auth():
 
 @scoreboard.route("/submissionOK")
 def sub_ok():
-    """Return page confirming submission succeeded"""
+    """Return page confirming submission succeeded."""
     return render_template("submissionOK.html")
 
 
@@ -83,8 +83,9 @@ def submit():
     authed_for = auth_manager.check_auth(current_app.config["DB"], request)
     current_app.logger.info(f"request is authenticated for {authed_for}")
 
-    sub_for = request.form.get("game") if request.method == "POST" else []
-    if sub_for.upper() in authed_for:
+    sub_for = request.form.get("game") if request.method == "POST" else None
+    current_app.logger.debug(f"request is submitting for {sub_for}")
+    if sub_for is not None and sub_for.upper() in authed_for:
         try:
             with sqlite3.connect(current_app.config["DB"]) as scores:
                 score_manager.insert_or_update_score(scores, request.form)
