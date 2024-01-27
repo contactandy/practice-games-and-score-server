@@ -23,7 +23,15 @@ jobs:
         with:
           name: ${{ env.REPO_NAME }}
           path: ./${{ env.REPO_NAME }}.bundle
+      - name: Build exe
+        run: | 
+          pipx install poetry
+          poetry run pyinstaller basic_games/__init__.py --name basic-games-client
+          poetry run pyinstaller score_server/score_server.py --name basic-games-server
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          files: ${{ env.REPO_NAME}}.bundle
+          files: | 
+            ${{ env.REPO_NAME}}.bundle
+            basic-games-client
+            basic-games-server
