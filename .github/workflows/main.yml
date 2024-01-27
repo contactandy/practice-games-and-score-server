@@ -27,6 +27,7 @@ jobs:
         run: | 
           pipx install poetry
           poetry install 
+          poetry show
           pyinstaller basic_games/__init__.py --name basic-games-client
           pyinstaller score_server/score_server.py --name basic-games-server
       - name: Release
