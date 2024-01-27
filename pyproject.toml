@@ -11,7 +11,7 @@ basic-games-client = "basic_games.__init__:main"
 basic-games-server = "score_server.score_server:main"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = ">=3.10,<3.13"   #`<` set by pyinstaller
 pygame = "^2.5.2"
 numpy = "^1.26.2"
 flask = "^3.0.0"
@@ -21,6 +21,7 @@ requests = "^2.31.0"
 ruff = "^0.1.9"
 pre-commit = "^3.6.0"
 pytest = "^7.4.3"
+pyinstaller = "^6.3.0"
 
 [build-system]
 requires = ["poetry-core"]
