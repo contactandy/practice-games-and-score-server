@@ -26,8 +26,9 @@ jobs:
       - name: Build exe
         run: | 
           pipx install poetry
-          poetry run pyinstaller basic_games/__init__.py --name basic-games-client
-          poetry run pyinstaller score_server/score_server.py --name basic-games-server
+          poetry install 
+          pyinstaller basic_games/__init__.py --name basic-games-client
+          pyinstaller score_server/score_server.py --name basic-games-server
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
