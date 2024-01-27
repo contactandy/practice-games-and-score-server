@@ -92,8 +92,8 @@ sequenceDiagram
     A ->> C: HTTP 307 to /index with SC set
     Note right of C: Generate CR
     C ->> S: HTTP POST with CR set
-    A ->> T: Query for CR
-    T ->> A: Query result
+    S ->> T: Query for CR
+    T ->> S: Query result
     alt CR is good
         S ->> C: HTTP 303 to /sub_ok
     else CR is bad
