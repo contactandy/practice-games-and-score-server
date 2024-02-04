@@ -28,7 +28,7 @@ jobs:
           pipx install poetry
           poetry install 
           poetry run pyinstaller --onefile --name basic-games-client basic_games/__init__.py
-          poetry run pyinstaller --onefile --name basic-games-server score_server/wsgi.py
+          poetry run pyinstaller --onefile --add-data "score_server/templates:score_server/templates" --name basic-games-server score_server/wsgi.py
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
