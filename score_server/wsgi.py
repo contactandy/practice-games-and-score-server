@@ -28,7 +28,8 @@ def getLogLevels():
 
 
 PARSER = argparse.ArgumentParser(description="Server for logging scores")
-PARSER.add_argument("--port", help="Port to use. Defaults to 5000.")
+PARSER.add_argument("--port", help="Port to use. Defaults to 5000.", default=5000, type=int)
+PARSER.add_argument("--host", help="Host IP to use. Defaults to localhost.", default='localhost', type=str)
 PARSER.add_argument(
     "--log-level",
     choices=getLogLevels(),
@@ -45,7 +46,7 @@ def main():
     logging.basicConfig(level=numeric_level)
     logging.info(f"Log level set to {args.log_level}[{numeric_level}]")
 
-    app.run(port=args.port)
+    app.run(port=args.port, host=args.host)
 
 
 if __name__ == "__main__":
